@@ -22,7 +22,7 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     # Pass the 'request' object to the template so it can access app.routes
-    return templates.TemplateResponse("home.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="home.html")
 
 @app.post("/classify/")
 async def classify_image(file: UploadFile = File(...), n_classes: int = Form(...)):
