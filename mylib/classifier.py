@@ -58,5 +58,9 @@ def normalize_image(img: np.ndarray) -> np.ndarray:
     """
     img_min = img.min()
     img_max = img.max()
-    normalized_img = (img - img_min) / (img_max - img_min)
+    divisor = img_max - img_min
+    # Replace zero divisor with one to avoid division by zero
+    if divisor == 0:
+        divisor = 1
+    normalized_img = (img - img_min) / divisor
     return normalized_img
