@@ -1,7 +1,7 @@
 """
 API main module using FastAPI for mylib functions endpoints.
 """
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from fastapi import FastAPI, File, UploadFile, Form
 import numpy as np
 import cv2
 from fastapi.templating import Jinja2Templates

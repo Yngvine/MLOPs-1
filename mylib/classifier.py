@@ -3,12 +3,12 @@
 import numpy as np
 import random
 
-def predict_class(img: np.ndarray, n: int) -> int:
+def predict_class(_img: np.ndarray, n: int) -> int:
     """Predict the class of an image using a dummy model.   
     
     Parameters
     ----------
-    img : np.ndarray
+    _img : np.ndarray
         Input image as a numpy array.
     n : int
         Number of classes.

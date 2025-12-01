@@ -3,8 +3,8 @@ Description: mylib package initializer
 """
 from .classifier import predict_class, crop_image, normalize_image
 
-all = [
+__all__ = [
     "predict_class",
-    "resize_image",
+    "crop_image",
     "normalize_image",
 ]
