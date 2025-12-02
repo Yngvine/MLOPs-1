@@ -73,14 +73,14 @@ git clone https://github.com/yourusername/MLOps-Lab1.git
 cd MLOps-Lab1
 
 # Install dependencies
-# (Add installation commands once dependencies are defined)
+make install
 ```
 
 ### Usage
 
 ```bash
-# CLI usage examples will be added
-# API startup instructions will be added
+# The api can be deployed via
+uv run python -m api.fastapi_main
 ```
 
 ## Continuous Integration
