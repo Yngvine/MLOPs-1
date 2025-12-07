@@ -4,9 +4,9 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [ "main" , "master"]
+    branches: [ "Lab02" ]
   pull_request:
-    branches: [ "main" , "master"]
+    branches: [ "Lab02" ]
 
 jobs:
   #################################################
