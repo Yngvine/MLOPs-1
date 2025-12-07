@@ -4,9 +4,9 @@ name: CD Pipeline
 
 on:
   push:
-    branches: [ "Lab02" ]
+    branches: [ "Lab02", "hf-space" ]
   pull_request:
-    branches: [ "Lab02" ]
+    branches: [ "Lab02", "hf-space" ]
 
 jobs:
   #################################################
@@ -47,28 +47,26 @@ jobs:
   deploy-hf-space:
     name: Deploy Hugging Face Space
     runs-on: ubuntu-latest
+    needs: deploy-api # Optional: strictly speaking, frontend doesn't depend on backend build, but good for ordering
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Fetch all history so we can switch to the hf-space branch
           fetch-depth: 0
+          lfs: true  # Recommended: If your Gradio app has large files/models
 
       - name: Switch to hf-space branch
         run: |
-          # Check if hf-space branch exists locally, if not, create it from main
-          if ! git show-ref --verify --quiet refs/heads/hf-space; then
-            git checkout -b hf-space main
-          else
-            git checkout hf-space
-          fi
-          git status
-
-      - name: Add Hugging Face remote
-        run: git remote add huggingface https://user:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Yngvine/Mlops02
+          # Checkout the existing remote branch 'hf-space'
+          # This pulls the Gradio code, not the main branch code
+          git checkout hf-space
 
       - name: Push to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Force push the local hf-space branch to the main branch of the HF remote
-          # The --force is often necessary for HF Spaces deployments
+          # Add remote
+          git remote add huggingface https://Yngvine:$HF_TOKEN@huggingface.co/spaces/Yngvine/Mlops02
+          
+          # Push the local 'hf-space' branch to the remote 'main' branch
           git push --force huggingface hf-space:main
