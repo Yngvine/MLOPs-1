@@ -1,6 +1,6 @@
 # .github/workflows/cd.yml
 
-name: Continuous Deployment
+name: CD Pipeline
 
 on:
   push:
