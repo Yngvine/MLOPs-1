@@ -1,6 +1,7 @@
 import io
 import requests
 from typing import Tuple, Optional
+import time
 
 from PIL import Image
 
@@ -13,43 +14,74 @@ def _image_to_jpeg_bytes(img: Image.Image) -> bytes:
 
 
 def classify_image(img: Image.Image, n_classes: int, base_url: str) -> str:
-	if n_classes is None or n_classes <= 0:
-		return "n_classes must be > 0"
-	url = base_url.rstrip("/") + "/classify/"
-	files = {
-		"file": ("image.jpg", _image_to_jpeg_bytes(img), "image/jpeg")
-	}
-	data = {"n_classes": str(n_classes)}
-	try:
-		resp = requests.post(url, files=files, data=data, timeout=10)
-	except requests.RequestException as e:
-		return f"Request failed: {e}"
-	if resp.status_code != 200:
-		return f"Error {resp.status_code}: {resp.text}"
-	try:
-		j = resp.json()
-		return str(j.get("predicted_class", j))
-	except Exception:
-		return "Invalid JSON response"
+    if n_classes is None or n_classes <= 0:
+        return "n_classes must be > 0"
+    url = base_url.rstrip("/") + "/classify/"
+    files = {
+        "file": ("image.jpg", _image_to_jpeg_bytes(img), "image/jpeg")
+    }
+    data = {"n_classes": str(n_classes)}
 
+    MAX_RETRIES = 5
+    TIMEOUT = 30  # seconds per request
+    BACKOFF_FACTOR = 2
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            resp = requests.post(url, files=files, data=data, timeout=TIMEOUT)
+        except requests.RequestException as e:
+            if attempt == MAX_RETRIES:
+                return f"Request failed after {attempt} attempts: {e}"
+            time.sleep(BACKOFF_FACTOR ** (attempt - 1))
+            continue
+        if resp.status_code != 200:
+            if attempt == MAX_RETRIES:
+                return f"Error {resp.status_code}: {resp.text}"
+            time.sleep(BACKOFF_FACTOR ** (attempt - 1))
+            continue
+        try:
+            j = resp.json()
+            return str(j.get("predicted_class", j))
+        except Exception:
+            return "Invalid JSON response"
+    # fallback
+    return "Request failed"
 
 def _call_image_return(img: Image.Image, endpoint: str, base_url: str, extra: Optional[dict] = None) -> Tuple[Optional[Image.Image], str]:
-	url = base_url.rstrip("/") + endpoint
-	files = {"file": ("image.jpg", _image_to_jpeg_bytes(img), "image/jpeg")}
-	data = {}
-	if extra:
-		data.update({k: str(v) for k, v in extra.items()})
-	try:
-		resp = requests.post(url, files=files, data=data, timeout=15)
-	except requests.RequestException as e:
-		return None, f"Request failed: {e}"
-	if resp.status_code != 200:
-		return None, f"Error {resp.status_code}: {resp.text}"
-	try:
-		out_img = Image.open(io.BytesIO(resp.content)).convert("RGB")
-		return out_img, ""
-	except Exception as e:
-		return None, f"Failed to decode image: {e}"
+    url = base_url.rstrip("/") + endpoint
+    files = {"file": ("image.jpg", _image_to_jpeg_bytes(img), "image/jpeg")}
+    data = {}
+    if extra:
+        data.update({k: str(v) for k, v in extra.items()})
+
+    MAX_RETRIES = 6
+    TIMEOUT = 40  # seconds per request
+    BACKOFF_FACTOR = 2
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            resp = requests.post(url, files=files, data=data, timeout=TIMEOUT)
+        except requests.RequestException as e:
+            if attempt == MAX_RETRIES:
+                return None, f"Request failed after {attempt} attempts: {e}"
+            time.sleep(BACKOFF_FACTOR ** (attempt - 1))
+            continue
+        if resp.status_code != 200:
+            if attempt == MAX_RETRIES:
+                return None, f"Error {resp.status_code}: {resp.text}"
+            time.sleep(BACKOFF_FACTOR ** (attempt - 1))
+            continue
+        try:
+            out_img = Image.open(io.BytesIO(resp.content)).convert("RGB")
+            return out_img, ""
+        except Exception as e:
+            if attempt == MAX_RETRIES:
+                return None, f"Failed to decode image after {attempt} attempts: {e}"
+            time.sleep(BACKOFF_FACTOR ** (attempt - 1))
+            continue
+
+    # fallback
+    return None, "Request failed"
 
 
 def normalize_image_gr(img: Image.Image, base_url: str) -> Tuple[Optional[Image.Image], str]:
