@@ -34,14 +34,26 @@ RUN pip install --upgrade pip --root-user-action=ignore\
 # Determine where site-packages were installed and copy them to a stable location
 RUN python - <<'PY'
 import sys, site, shutil, os
-# choose a destination inside the image where runtime Python will look
+
+# Determine destination
 dst = '/usr/local/lib/python{major}.{minor}/site-packages'.format(major=sys.version_info.major, minor=sys.version_info.minor)
 os.makedirs(dst, exist_ok=True)
-# copy all site-packages from known site.getsitepackages() locations
+
+# Get absolute path of destination to compare later
+dst_abs = os.path.abspath(dst)
+
+# Copy all site-packages
 for src in site.getsitepackages():
     if os.path.isdir(src):
-        shutil.copytree(src, dst, dirs_exist_ok=True)
-print('copied site-packages to', dst)
+        src_abs = os.path.abspath(src)
+        # ONLY copy if the source is not the same as the destination
+        if src_abs != dst_abs:
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+            print(f"Copied from {src} to {dst}")
+        else:
+            print(f"Skipping {src} (same as destination)")
+
+print('Consolidation complete')
 PY
 
 ### Runtime stage: copy only installed packages and application source
