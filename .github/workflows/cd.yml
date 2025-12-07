@@ -36,7 +36,7 @@ jobs:
         with:
           context: . # Assumes Dockerfile is in the root directory
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlops02:latest,${{ secrets.DOCKERHUB_USERNAME }}/your-api-image-name:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlops02:latest,${{ secrets.DOCKERHUB_USERNAME }}/mlops02:latest:${{ github.sha }}
 
       - name: Trigger Render deployment
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_KEY }}
