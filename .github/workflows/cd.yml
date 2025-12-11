@@ -14,7 +14,8 @@ jobs:
   #################################################
   deploy-api:
     name: Deploy API
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  
+    if: github.ref == 'refs/heads/Lab02'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,7 +37,9 @@ jobs:
         with:
           context: . # Assumes Dockerfile is in the root directory
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlops02:latest,${{ secrets.DOCKERHUB_USERNAME }}/mlops02:latest
+          tags: 
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlops02:latest,
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlops02:${{ github.sha }}
 
       - name: Trigger Render deployment
         run: curl -X POST https://api.render.com/deploy/srv-d4ot4si4i8rc73b033ig?key=${{ secrets.RENDER_DEPLOY_HOOK_KEY }}
@@ -47,7 +50,7 @@ jobs:
   deploy-hf-space:
     name: Deploy Hugging Face Space
     runs-on: ubuntu-latest
-    needs: deploy-api # Optional: strictly speaking, frontend doesn't depend on backend build, but good for ordering
+    if: github.ref == 'refs/heads/hf-space'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
