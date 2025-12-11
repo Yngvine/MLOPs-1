@@ -4,9 +4,9 @@ name: CD Pipeline
 
 on:
   push:
-    branches: [ "Lab02", "hf-space" ]
+    branches: [ "Lab03", "hf-space-final" ]
   pull_request:
-    branches: [ "Lab02", "hf-space" ]
+    branches: [ "Lab03", "hf-space-final" ]
 
 jobs:
   #################################################
@@ -15,7 +15,7 @@ jobs:
   deploy-api:
     name: Deploy API
     runs-on: ubuntu-latest  
-    if: github.ref == 'refs/heads/Lab02'
+    if: github.ref == 'refs/heads/Lab03'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,11 +38,11 @@ jobs:
           context: . # Assumes Dockerfile is in the root directory
           push: true
           tags: 
-            ${{ secrets.DOCKERHUB_USERNAME }}/mlops02:latest,
-            ${{ secrets.DOCKERHUB_USERNAME }}/mlops02:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlops03:latest,
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlops03:${{ github.sha }}
 
       - name: Trigger Render deployment
-        run: curl -X POST https://api.render.com/deploy/srv-d4ot4si4i8rc73b033ig?key=${{ secrets.RENDER_DEPLOY_HOOK_KEY }}
+        run: curl -X POST https://api.render.com/deploy/srv-d4ot4si4i8rc73b033ig?key=${{ secrets.RENDER_DEPLOY_HOOK_KEY_03 }}
 
   #########################################################
   # Job 2: Deploy the Gradio App to Hugging Face Spaces
@@ -50,7 +50,7 @@ jobs:
   deploy-hf-space:
     name: Deploy Hugging Face Space
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/hf-space'
+    if: github.ref == 'refs/heads/hf-space-final'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -58,18 +58,16 @@ jobs:
           fetch-depth: 0
           lfs: true  # Recommended: If your Gradio app has large files/models
 
-      - name: Switch to hf-space branch
+      - name: Switch to hf-space-final branch
         run: |
-          # Checkout the existing remote branch 'hf-space'
-          # This pulls the Gradio code, not the main branch code
-          git checkout hf-space
+          git checkout hf-space-final
 
       - name: Push to Hugging Face Spaces
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           # Add remote
-          git remote add huggingface https://Yngvine:$HF_TOKEN@huggingface.co/spaces/Yngvine/Mlops02
+          git remote add huggingface https://Yngvine:$HF_TOKEN@huggingface.co/spaces/Yngvine/Mlops03
           
-          # Push the local 'hf-space' branch to the remote 'main' branch
-          git push --force huggingface hf-space:main
+          # Push the local 'hf-space-final' branch to the remote 'main' branch
+          git push --force huggingface hf-space-final:main
