@@ -1,6 +1,9 @@
 # Custom Python.gitignore dirs
 /data
 /mlruns
+mlflow.db
+model/oxford_pets_mobilenetv2.onnx
+model/oxford_pets_mobilenetv2.onnx.data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
