@@ -31,8 +31,7 @@ async def classify_image(file: UploadFile = File(...), n_classes: int = Form(...
     nparr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
-    img = normalize_image(img)
-    img = crop_image(img, (64, 64))
+    # We pass the raw image to predict_class, which handles preprocessing for the model
     pred_class = predict_class(img, n_classes)
     
     return {"predicted_class": int(pred_class)}

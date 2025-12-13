@@ -18,8 +18,6 @@ def classify(img_path, n_classes):
     """Classify an image located at IMG_PATH into one of N_CLASSES."""
     
     img = cv2.imread(img_path)
-    img = normalize_image(img)
-    img = crop_image(img, (64, 64))
     pred_class = predict_class(img, n_classes)
     click.echo(f"Predicted class: {pred_class}")
 
