@@ -42,7 +42,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/mlops03:${{ github.sha }}
 
       - name: Trigger Render deployment
-        run: curl -X POST https://api.render.com/deploy/srv-d4ot4si4i8rc73b033ig?key=${{ secrets.RENDER_DEPLOY_HOOK_KEY_03 }}
+        run: curl -X POST https://api.render.com/deploy/srv-d4tg8ummcj7s73bs1ou0?key=${{ secrets.RENDER_DEPLOY_HOOK_KEY_03 }}
 
   #########################################################
   # Job 2: Deploy the Gradio App to Hugging Face Spaces
