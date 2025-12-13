@@ -76,7 +76,7 @@ COPY api/ /app/api/
 COPY mylib/ /app/mylib/
 COPY model/ /app/model/
 COPY templates/ /app/templates/
-COPY pyproject.toml /app/
+COPY pyproject.toml uv.lock /app/
 
 # copy uv CLI from builder
 COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
@@ -85,4 +85,4 @@ RUN chmod +x /usr/local/bin/uv
 EXPOSE 8000
 
 # Default command: run the FastAPI app with uvicorn
-CMD ["uv", "run", "uvicorn", "api.fastapi_main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "--no-dev", "uvicorn", "api.fastapi_main:app", "--host", "0.0.0.0", "--port", "8000"]
