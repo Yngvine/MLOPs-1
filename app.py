@@ -109,7 +109,7 @@ def build_ui():
 				n_classes = gr.Number(value=3, precision=0, label="n_classes (for classify)")
 				width = gr.Number(value=64, precision=0, label="Crop width")
 				height = gr.Number(value=64, precision=0, label="Crop height")
-				base_url = gr.Textbox(value="https://mlops02-latest.onrender.com", label="API base URL")
+				base_url = gr.Textbox(value="https://mlops03-latest.onrender.com", label="API base URL")
 				classify_btn = gr.Button("Classify")
 				normalize_btn = gr.Button("Normalize")
 				crop_btn = gr.Button("Crop")
