@@ -29,7 +29,7 @@ COPY pyproject.toml uv.lock /app/
 # can reuse the installed packages without carrying build tools.
 RUN pip install --upgrade pip --root-user-action=ignore\
     && pip install uv --root-user-action=ignore\
-    && uv sync
+    && uv sync --no-dev
 
 # Determine where site-packages were installed and copy them to a stable location
 RUN python - <<'PY'
@@ -74,6 +74,7 @@ COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/pytho
 # Copy only the application code needed at runtime
 COPY api/ /app/api/
 COPY mylib/ /app/mylib/
+COPY model/ /app/model/
 COPY templates/ /app/templates/
 COPY pyproject.toml /app/
 
