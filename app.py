@@ -101,47 +101,67 @@ def crop_image_gr(img: Image.Image, width: int, height: int, base_url: str) -> T
 
 
 def build_ui():
-	with gr.Blocks() as demo:
-		gr.Markdown("# Gradio frontend for FastAPI image service")
-		with gr.Row():
-			with gr.Column(scale=1):
-				inp = gr.Image(type="pil", label="Upload Image")
-				n_classes = gr.Number(value=3, precision=0, label="n_classes (for classify)")
-				width = gr.Number(value=64, precision=0, label="Crop width")
-				height = gr.Number(value=64, precision=0, label="Crop height")
-				base_url = gr.Textbox(value="https://mlops03-latest.onrender.com", label="API base URL")
-				classify_btn = gr.Button("Classify")
-				normalize_btn = gr.Button("Normalize")
-				crop_btn = gr.Button("Crop")
-			with gr.Column(scale=1):
-				class_out = gr.Textbox(label="Predicted class")
-				norm_out = gr.Image(label="Normalized image")
-				crop_out = gr.Image(label="Cropped image")
-				status = gr.Textbox(label="Status / Errors")
+    with gr.Blocks() as demo:
+        gr.Markdown("# Gradio frontend for FastAPI image service")
+        
+        base_url = gr.Textbox(value="https://mlops03-latest.onrender.com", label="API base URL")
+        
+        with gr.Tabs():
+            with gr.TabItem("Classify"):
+                with gr.Row():
+                    with gr.Column():
+                        cls_inp = gr.Image(type="pil", label="Upload Image")
+                        n_classes = gr.Number(value=3, precision=0, label="n_classes")
+                        classify_btn = gr.Button("Classify")
+                    with gr.Column():
+                        class_out = gr.Textbox(label="Predicted class")
+                        cls_status = gr.Textbox(label="Status / Errors")
+                
+                def _on_classify(image, n, url):
+                    if image is None:
+                        return "", "No image provided"
+                    res = classify_image(image, int(n), url)
+                    return res, ""
+                
+                classify_btn.click(_on_classify, inputs=[cls_inp, n_classes, base_url], outputs=[class_out, cls_status])
 
-		def _on_classify(image, n, url):
-			if image is None:
-				return "", None, None, "No image provided"
-			res = classify_image(image, int(n), url)
-			return res, None, None, ""
+            with gr.TabItem("Normalize"):
+                with gr.Row():
+                    with gr.Column():
+                        norm_inp = gr.Image(type="pil", label="Upload Image")
+                        normalize_btn = gr.Button("Normalize")
+                    with gr.Column():
+                        norm_out = gr.Image(label="Normalized image")
+                        norm_status = gr.Textbox(label="Status / Errors")
+                
+                def _on_normalize(image, url):
+                    if image is None:
+                        return None, "No image provided"
+                    out_img, err = normalize_image_gr(image, url)
+                    return out_img, err
 
-		def _on_normalize(image, url):
-			if image is None:
-				return None, "No image provided"
-			out_img, err = normalize_image_gr(image, url)
-			return out_img, err
+                normalize_btn.click(_on_normalize, inputs=[norm_inp, base_url], outputs=[norm_out, norm_status])
 
-		def _on_crop(image, w, h, url):
-			if image is None:
-				return None, "No image provided"
-			out_img, err = crop_image_gr(image, int(w), int(h), url)
-			return out_img, err
+            with gr.TabItem("Crop"):
+                with gr.Row():
+                    with gr.Column():
+                        crop_inp = gr.Image(type="pil", label="Upload Image")
+                        width = gr.Number(value=64, precision=0, label="Crop width")
+                        height = gr.Number(value=64, precision=0, label="Crop height")
+                        crop_btn = gr.Button("Crop")
+                    with gr.Column():
+                        crop_out = gr.Image(label="Cropped image")
+                        crop_status = gr.Textbox(label="Status / Errors")
 
-		classify_btn.click(_on_classify, inputs=[inp, n_classes, base_url], outputs=[class_out, norm_out, crop_out, status])
-		normalize_btn.click(_on_normalize, inputs=[inp, base_url], outputs=[norm_out, status])
-		crop_btn.click(_on_crop, inputs=[inp, width, height, base_url], outputs=[crop_out, status])
+                def _on_crop(image, w, h, url):
+                    if image is None:
+                        return None, "No image provided"
+                    out_img, err = crop_image_gr(image, int(w), int(h), url)
+                    return out_img, err
 
-	return demo
+                crop_btn.click(_on_crop, inputs=[crop_inp, width, height, base_url], outputs=[crop_out, crop_status])
+
+    return demo
 
 
 if __name__ == "__main__":
