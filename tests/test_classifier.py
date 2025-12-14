@@ -21,6 +21,10 @@ def test_predict_class_valid(sample_image, mocker):
     """Test that predict_class returns a valid string class label."""
     # Mock the ONNX session and class labels
     mock_session = mocker.Mock()
+    mock_input = mocker.Mock()
+    mock_input.name = "input"
+    mock_session.get_inputs.return_value = [mock_input]
+    
     mock_output = [np.array([[0.1, 0.8, 0.1]])] # Class 1 has highest probability
     mock_session.run.return_value = mock_output
     
@@ -34,6 +38,9 @@ def test_predict_class_valid(sample_image, mocker):
 def test_predict_class_missing_labels(sample_image, mocker):
     """Test that predict_class raises RuntimeError if labels are missing."""
     mock_session = mocker.Mock()
+    mock_input = mocker.Mock()
+    mock_input.name = "input"
+    mock_session.get_inputs.return_value = [mock_input]
     mocker.patch('mylib.classifier._get_ort_session', return_value=mock_session)
     mocker.patch('mylib.classifier._CLASS_LABELS', None)
     

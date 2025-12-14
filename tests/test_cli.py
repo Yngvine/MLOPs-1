@@ -51,13 +51,13 @@ def invalid_image_file(tmp_path):
 # --- Tests for 'classify' command ---
 def test_classify_correct_path(runner, sample_image):
     """Test that classify runs successfully with valid input."""
-    result = runner.invoke(cli, ["classify", sample_image, "5"])
+    result = runner.invoke(cli, ["classify", sample_image])
     assert result.exit_code == 0
     assert "Predicted class:" in result.output
 
 def test_classify_invalid_path(runner):
     """Test that classify fails gracefully with non-existent file."""
-    result = runner.invoke(cli, ["classify", "non_existent.jpg", "5"])
+    result = runner.invoke(cli, ["classify", "non_existent.jpg"])
     assert result.exit_code != 0
     # Click handles file existence check automatically
     assert "Error" in result.output
