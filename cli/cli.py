@@ -13,12 +13,11 @@ def cli():
     
 @cli.command()
 @click.argument("img_path", type=click.Path(exists=True))
-@click.argument("n_classes", type=int)
-def classify(img_path, n_classes):
-    """Classify an image located at IMG_PATH into one of N_CLASSES."""
+def classify(img_path):
+    """Classify an image located at IMG_PATH."""
     
     img = cv2.imread(img_path)
-    pred_class = predict_class(img, n_classes)
+    pred_class = predict_class(img)
     click.echo(f"Predicted class: {pred_class}")
 
 @cli.command()
