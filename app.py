@@ -25,7 +25,7 @@ def classify_image(img: Image.Image, base_url: str) -> str:
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            resp = requests.post(url, files=files, data=data, timeout=TIMEOUT)
+            resp = requests.post(url, files=files, timeout=TIMEOUT)
         except requests.RequestException as e:
             if attempt == MAX_RETRIES:
                 return f"Request failed after {attempt} attempts: {e}"
