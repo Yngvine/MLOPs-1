@@ -1106,6 +1106,7 @@ dependencies = [
     { name = "black" },
     { name = "click" },
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "jinja2" },
     { name = "numpy" },
     { name = "onnxruntime" },
@@ -1120,7 +1121,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx" },
     { name = "matplotlib" },
     { name = "mlflow" },
     { name = "onnx" },
@@ -1134,6 +1134,7 @@ requires-dist = [
     { name = "black", specifier = ">=25.12.0" },
     { name = "click", specifier = ">=8.3.1" },
     { name = "fastapi", specifier = ">=0.121.3" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "numpy", specifier = ">=2.3.5" },
     { name = "onnxruntime", specifier = ">=1.23.2" },
@@ -1148,7 +1149,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "httpx", specifier = ">=0.28.1" },
     { name = "matplotlib", specifier = ">=3.10.8" },
     { name = "mlflow", specifier = ">=3.7.0" },
     { name = "onnx", specifier = ">=1.20.0" },
