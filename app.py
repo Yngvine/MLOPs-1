@@ -13,14 +13,11 @@ def _image_to_jpeg_bytes(img: Image.Image) -> bytes:
 	return buf.getvalue()
 
 
-def classify_image(img: Image.Image, n_classes: int, base_url: str) -> str:
-    if n_classes is None or n_classes <= 0:
-        return "n_classes must be > 0"
+def classify_image(img: Image.Image, base_url: str) -> str:
     url = base_url.rstrip("/") + "/classify/"
     files = {
         "file": ("image.jpg", _image_to_jpeg_bytes(img), "image/jpeg")
     }
-    data = {"n_classes": str(n_classes)}
 
     MAX_RETRIES = 5
     TIMEOUT = 30  # seconds per request
@@ -111,7 +108,6 @@ def build_ui():
                 with gr.Row():
                     with gr.Column():
                         cls_inp = gr.Image(type="pil", label="Upload Image")
-                        n_classes = gr.Number(value=3, precision=0, label="n_classes")
                         classify_btn = gr.Button("Classify")
                     with gr.Column():
                         class_out = gr.Textbox(label="Predicted class")
@@ -123,7 +119,7 @@ def build_ui():
                     res = classify_image(image, int(n), url)
                     return res, ""
                 
-                classify_btn.click(_on_classify, inputs=[cls_inp, n_classes, base_url], outputs=[class_out, cls_status])
+                classify_btn.click(_on_classify, inputs=[cls_inp, base_url], outputs=[class_out, cls_status])
 
             with gr.TabItem("Normalize"):
                 with gr.Row():
