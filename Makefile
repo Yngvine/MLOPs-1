@@ -1,6 +1,6 @@
 install:
 	pip install uv &&\
-	uv sync
+	uv sync --no-dev
 
 test:
 	uv run python -m pytest tests/ -vv --cov=mylib --cov=api --cov=cli 
