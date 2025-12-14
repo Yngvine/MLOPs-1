@@ -25,16 +25,16 @@ async def read_root(request: Request):
     return templates.TemplateResponse(request=request, name="home.html")
 
 @app.post("/classify/")
-async def classify_image(file: UploadFile = File(...), n_classes: int = Form(...)):
-    """Classify an uploaded image into one of N_CLASSES."""
+async def classify_image(file: UploadFile = File(...)):
+    """Classify an uploaded image."""
     contents = await file.read()
     nparr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
     # We pass the raw image to predict_class, which handles preprocessing for the model
-    pred_class = predict_class(img, n_classes)
+    pred_class = predict_class(img)
     
-    return {"predicted_class": int(pred_class)}
+    return {"predicted_class": pred_class}
 
 @app.post("/crop/")
 async def crop_image_endpoint(file: UploadFile = File(...), width: int = Form(...), height: int = Form(...)):

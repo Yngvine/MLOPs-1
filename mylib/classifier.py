@@ -4,53 +4,65 @@ import numpy as np
 import random
 import os
 import cv2
-from typing import cast
+import json
+from typing import cast, Union
 
-# Global variable to hold the ONNX session
+# Global variable to hold the ONNX session and class labels
 _ORT_SESSION = None
+_CLASS_LABELS = None
 
 def _get_ort_session():
-    """Lazy load the ONNX session."""
-    global _ORT_SESSION
+    """Lazy load the ONNX session and class labels."""
+    global _ORT_SESSION, _CLASS_LABELS
     if _ORT_SESSION is None:
         try:
             import onnxruntime as ort
             # Assuming the model is in the 'model' directory at the project root
             # mylib/classifier.py -> ../model/oxford_pets_mobilenetv2.onnx
-            model_path = os.path.join(os.path.dirname(__file__), "..", "model", "oxford_pets_mobilenetv2.onnx")
-            model_path = os.path.abspath(model_path)
+            base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "model"))
+            model_path = os.path.join(base_path, "oxford_pets_mobilenetv2.onnx")
+            labels_path = os.path.join(base_path, "class_labels.json")
+            
             if os.path.exists(model_path):
                 _ORT_SESSION = ort.InferenceSession(model_path)
             else:
                 print(f"Warning: ONNX model not found at {model_path}")
+                
+            if os.path.exists(labels_path):
+                with open(labels_path, 'r') as f:
+                    _CLASS_LABELS = json.load(f)
+            else:
+                print(f"Warning: Class labels not found at {labels_path}")
+                
         except ImportError:
             print("Warning: onnxruntime not installed.")
     return _ORT_SESSION
 
-def predict_class(_img: np.ndarray, n: int) -> int:
+def predict_class(_img: np.ndarray) -> str:
     """Predict the class of an image using the trained ONNX model.
     
     Parameters
     ----------
     _img : np.ndarray
         Input image as a numpy array.
-    n : int
-        Number of classes (unused, kept for API compatibility).
 
     Returns
     -------
-    int
+    str
         Predicted class label.
         
     Raises
     ------
     RuntimeError
-        If the ONNX model is not found or inference fails.
+        If the ONNX model is not found, class labels are missing, or inference fails.
     """
     session = _get_ort_session()
     
     if session is None:
         raise RuntimeError("ONNX model not found. Please train and serialize the model first.")
+        
+    if _CLASS_LABELS is None:
+        raise RuntimeError("Class labels not found. Please ensure class_labels.json exists.")
 
     try:
         # Preprocessing for MobileNetV2
@@ -78,7 +90,10 @@ def predict_class(_img: np.ndarray, n: int) -> int:
         output_tensor = cast(np.ndarray, outputs[0])
         predicted_class = np.argmax(output_tensor)
         
-        return int(predicted_class)
+        if predicted_class < len(_CLASS_LABELS):
+            return _CLASS_LABELS[predicted_class]
+        
+        raise RuntimeError(f"Predicted index {predicted_class} out of bounds for class labels.")
     except Exception as e:
         raise RuntimeError(f"Error during inference: {e}") from e
 
