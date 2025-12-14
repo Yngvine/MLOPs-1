@@ -113,10 +113,10 @@ def build_ui():
                         class_out = gr.Textbox(label="Predicted class")
                         cls_status = gr.Textbox(label="Status / Errors")
                 
-                def _on_classify(image, n, url):
+                def _on_classify(image, url):
                     if image is None:
                         return "", "No image provided"
-                    res = classify_image(image, int(n), url)
+                    res = classify_image(image, url)
                     return res, ""
                 
                 classify_btn.click(_on_classify, inputs=[cls_inp, base_url], outputs=[class_out, cls_status])
