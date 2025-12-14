@@ -17,17 +17,28 @@ def solid_color_image():
 
 # --- Tests for predict_class ---
 
-def test_predict_class_valid(sample_image):
-    """Test that predict_class returns a valid integer within the range [0, n_classes-1]."""
-    n_classes = 5
-    prediction = predict_class(sample_image, n_classes)
-    assert isinstance(prediction, int)
-    assert 0 <= prediction < n_classes
+def test_predict_class_valid(sample_image, mocker):
+    """Test that predict_class returns a valid string class label."""
+    # Mock the ONNX session and class labels
+    mock_session = mocker.Mock()
+    mock_output = [np.array([[0.1, 0.8, 0.1]])] # Class 1 has highest probability
+    mock_session.run.return_value = mock_output
+    
+    mocker.patch('mylib.classifier._get_ort_session', return_value=mock_session)
+    mocker.patch('mylib.classifier._CLASS_LABELS', ["cat", "dog", "bird"])
+    
+    prediction = predict_class(sample_image)
+    assert isinstance(prediction, str)
+    assert prediction == "dog"
 
-def test_predict_class_single_class(sample_image):
-    """Test predict_class with n_classes=1."""
-    prediction = predict_class(sample_image, 1)
-    assert prediction == 0
+def test_predict_class_missing_labels(sample_image, mocker):
+    """Test that predict_class raises RuntimeError if labels are missing."""
+    mock_session = mocker.Mock()
+    mocker.patch('mylib.classifier._get_ort_session', return_value=mock_session)
+    mocker.patch('mylib.classifier._CLASS_LABELS', None)
+    
+    with pytest.raises(RuntimeError, match="Class labels not found"):
+        predict_class(sample_image)
 
 # --- Tests for crop_image ---
 

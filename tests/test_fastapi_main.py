@@ -41,37 +41,24 @@ def test_read_root():
 
 # --- Tests for 'classify' endpoint ---
 
-def test_classify_image(sample_image_bytes):
+def test_classify_image(sample_image_bytes, mocker):
     """Test the classification endpoint."""
-    files = {"file": ("test_image.jpg", sample_image_bytes, "image/jpeg")}
-    data = {"n_classes": str(5)}
+    # Mock predict_class to return a string
+    mocker.patch('api.fastapi_main.predict_class', return_value="Siamese")
     
-    response = client.post("/classify/", files=files, data=data)
+    files = {"file": ("test_image.jpg", sample_image_bytes, "image/jpeg")}
+    
+    response = client.post("/classify/", files=files)
     
     assert response.status_code == 200
     json_response = response.json()
     assert "predicted_class" in json_response
-    assert isinstance(json_response["predicted_class"], int)
+    assert isinstance(json_response["predicted_class"], str)
+    assert json_response["predicted_class"] == "Siamese"
 
-@pytest.mark.parametrize("n_classes", [0, -5])
-def test_classify_invalid_classes(sample_image_bytes, n_classes):
-    """Test that classify handles invalid class counts (returns 500 error)."""
-    files = {"file": ("test_image.jpg", sample_image_bytes, "image/jpeg")}
-    data = {"n_classes": str(n_classes)}
-    
-    # random.randint raises ValueError for these inputs, causing a 500 Server Error
-    response = client.post("/classify/", files=files, data=data)
-    print("PRINTING RESPONSE FOR DEBUGGING PURPOSES:")
-    print(response.status_code, response.text)
-    assert response.status_code == 500
-
-def test_classify_missing_param(sample_image_bytes):
-    """Test classify endpoint with missing parameters."""
-    files = {"file": ("test_image.jpg", sample_image_bytes, "image/jpeg")}
-    # Missing n_classes
-    response = client.post("/classify/", files=files)
-    
-    # FastAPI returns 422 Unprocessable Entity for missing required fields
+def test_classify_missing_file():
+    """Test classify endpoint with missing file."""
+    response = client.post("/classify/")
     assert response.status_code == 422
 
 # --- Tests for 'crop' endpoint ---
