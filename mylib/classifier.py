@@ -1,11 +1,10 @@
 """ Dummy image classification model and utility functions.
 """
-import numpy as np
-import random
 import os
-import cv2
 import json
-from typing import cast, Union
+from typing import cast
+import numpy as np
+import cv2
 
 # Global variable to hold the ONNX session and class labels
 _ORT_SESSION = None
@@ -13,6 +12,7 @@ _CLASS_LABELS = None
 
 def _get_ort_session():
     """Lazy load the ONNX session and class labels."""
+    # pylint: disable=global-statement
     global _ORT_SESSION, _CLASS_LABELS
     if _ORT_SESSION is None:
         try:
@@ -29,7 +29,7 @@ def _get_ort_session():
                 print(f"Warning: ONNX model not found at {model_path}")
                 
             if os.path.exists(labels_path):
-                with open(labels_path, 'r') as f:
+                with open(labels_path, 'r', encoding='utf-8') as f:
                     _CLASS_LABELS = json.load(f)
             else:
                 print(f"Warning: Class labels not found at {labels_path}")
