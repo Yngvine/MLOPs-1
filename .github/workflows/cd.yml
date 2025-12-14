@@ -4,9 +4,9 @@ name: CD Pipeline
 
 on:
   push:
-    branches: [ "Lab03", "hf-space-final" ]
+    branches: [ "Lab03" ]
   pull_request:
-    branches: [ "Lab03", "hf-space-final" ]
+    branches: [ "Lab03" ]
 
 jobs:
   #################################################
@@ -43,31 +43,3 @@ jobs:
 
       - name: Trigger Render deployment
         run: curl -X POST https://api.render.com/deploy/srv-d4tg8ummcj7s73bs1ou0?key=${{ secrets.RENDER_DEPLOY_HOOK_KEY_03 }}
-
-  #########################################################
-  # Job 2: Deploy the Gradio App to Hugging Face Spaces
-  #########################################################
-  deploy-hf-space:
-    name: Deploy Hugging Face Space
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/hf-space-final'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true  # Recommended: If your Gradio app has large files/models
-
-      - name: Switch to hf-space-final branch
-        run: |
-          git checkout hf-space-final
-
-      - name: Push to Hugging Face Spaces
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          # Add remote
-          git remote add huggingface https://Yngvine:$HF_TOKEN@huggingface.co/spaces/Yngvine/Mlops03
-          
-          # Push the local 'hf-space-final' branch to the remote 'main' branch
-          git push --force huggingface hf-space-final:main

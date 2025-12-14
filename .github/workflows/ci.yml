@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ "Lab03", "hf-space-final" ]
+    branches: [ "Lab03" ]
   pull_request:
-    branches: [ "Lab03", "hf-space-final" ]
+    branches: [ "Lab03" ]
 
 jobs:
   build:
