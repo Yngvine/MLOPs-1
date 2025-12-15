@@ -17,7 +17,7 @@ def serialize_best_model():
     # Query Registered Models
     try:
         registered_models = client.search_model_versions(f"name='{model_name}'")
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         print(f"Error searching models: {e}")
         return
 
@@ -51,7 +51,7 @@ def serialize_best_model():
                 best_acc = val_acc
                 best_run_id = run_id
                 best_version_num = version
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Could not fetch metrics for version {version}: {e}")
 
     if best_run_id is None:
@@ -79,7 +79,7 @@ def serialize_best_model():
         
         # Locate the JSON file inside the downloaded folder
         json_file = None
-        for root, dirs, files in os.walk(downloaded_path):
+        for root, _, files in os.walk(downloaded_path):
             for file in files:
                 if file.endswith(".json"):
                     json_file = os.path.join(root, file)
@@ -93,11 +93,11 @@ def serialize_best_model():
             
             # Cleanup the downloaded folder if it's different from destination
             if downloaded_path != local_artifacts_path:
-                 shutil.rmtree(downloaded_path, ignore_errors=True)
+                shutil.rmtree(downloaded_path, ignore_errors=True)
         else:
             print("Warning: No JSON file found in downloaded artifacts.")
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         print(f"Error downloading artifacts: {e}")
 
     # Serialize to ONNX
