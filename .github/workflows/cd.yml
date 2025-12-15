@@ -1,0 +1,75 @@
+# .github/workflows/cd.yml
+
+name: CD Pipeline
+
+on:
+  push:
+    branches: [ "Lab02", "hf-space" ]
+  pull_request:
+    branches: [ "Lab02", "hf-space" ]
+
+jobs:
+  #################################################
+  # Job 1: Deploy the API to Docker Hub and Render
+  #################################################
+  deploy-api:
+    name: Deploy API
+    runs-on: ubuntu-latest  
+    if: github.ref == 'refs/heads/Lab02'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: . # Assumes Dockerfile is in the root directory
+          push: true
+          tags: 
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlops02:latest,
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlops02:${{ github.sha }}
+
+      - name: Trigger Render deployment
+        run: curl -X POST https://api.render.com/deploy/srv-d4ot4si4i8rc73b033ig?key=${{ secrets.RENDER_DEPLOY_HOOK_KEY }}
+
+  #########################################################
+  # Job 2: Deploy the Gradio App to Hugging Face Spaces
+  #########################################################
+  deploy-hf-space:
+    name: Deploy Hugging Face Space
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/hf-space'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true  # Recommended: If your Gradio app has large files/models
+
+      - name: Switch to hf-space branch
+        run: |
+          # Checkout the existing remote branch 'hf-space'
+          # This pulls the Gradio code, not the main branch code
+          git checkout hf-space
+
+      - name: Push to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # Add remote
+          git remote add huggingface https://Yngvine:$HF_TOKEN@huggingface.co/spaces/Yngvine/Mlops02
+          
+          # Push the local 'hf-space' branch to the remote 'main' branch
+          git push --force huggingface hf-space:main
