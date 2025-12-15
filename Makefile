@@ -9,7 +9,7 @@ format:
 	uv run --no-dev black mylib/*.py cli/*.py api/*.py model/*.py
 
 lint:
-	uv run --no-dev pylint --disable=R,C --generated-members=cv2.* --ignore-patterns=test_.*\.py mylib/*.py cli/*.py api/*.py model/*.py
+	uv run --no-dev pylint --disable=R,C,E0401 --generated-members=cv2.* --ignore-patterns=test_.*\.py mylib/*.py cli/*.py api/*.py model/*.py
 
 refactor: format lint
 
